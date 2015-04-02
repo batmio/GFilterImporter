@@ -27,7 +27,7 @@ artifacts:
 - path: gfilter.zip
   name: GFilterImporter
 
-- path: GFilterImporter\bin\Debug\*
+- path: 'GFilterImporter\bin\Debug\*'
   name: executables
   type: zip
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Collections;
 using System.Xml;
 using System.IO;
 using System.Xml.Linq;
@@ -154,6 +155,9 @@ namespace GFilterImporter
         public static String CreateExchangeRule(string folder, string email, string exUser, 
             bool verbose, Outlook.Application outlook, string storeId)
         {
+            // If filter is a sub-folder it creates filters as Name/Subfolder
+            folder = folder.Replace('/', '\\');
+
             // Take the folder and the email name and parse it into a usable rule.
             if (verbose)
             {
@@ -165,49 +169,74 @@ namespace GFilterImporter
 
             // Retrieve current rules
             Outlook.Rules rules;
+            Outlook.Rule folderRule;
+
+            try
+            {
+                folderRule = outlook.Application.Session.GetStoreFromID(storeId).GetRules()[folder] as Outlook.Rule;
+            //    if folderRule != null 
+            }
+            catch (Exception e)
+            {
+                if (e.HResult == -2147221233)
+                {
+                    folderRule = null;
+                } else {
+                    Console.WriteLine("Rule already exists: \n{0}", e.Message);
+                    return null;
+                }
+            }
+
+            // here
             try
             {
                 rules = outlook.Application.Session.GetStoreFromID(storeId).GetRules();
             }
-            catch
+            catch 
             {
                 OutputColor(ConsoleColor.Red, "Could not obtain rules collection.\n");
                 return null;
             }
 
-            // Default Folder
-            Outlook.Folder newFolder;
-            Outlook.Folders folders = outlook.Session.GetStoreFromID(storeId).GetRootFolder().Folders;
-
-            // Test for folders
-            try
+            if (folderRule == null)
             {
-                newFolder = folders[folder] as Outlook.Folder;
-            }
-            catch
-            {
-                newFolder = folders.Add(folder, Type.Missing) as Outlook.Folder;
-            }
+                // folder rule doesn't exist, let the user know
+                OutputColor(ConsoleColor.Magenta, "Rule doesn't exist, creating new rule.\n");
 
-            // Now lets create our rule
-            Outlook.Rule rule = rules.Create(folder,
-                Outlook.OlRuleType.olRuleReceive);
+                // Default Folder
+                Outlook.Folder newFolder;
+                Outlook.Folders folders = outlook.Session.GetStoreFromID(storeId).GetRootFolder().Folders;
 
-            // From from the google label
-            rule.Conditions.From.Recipients.Add(email);
-            rule.Conditions.From.Enabled = true;
+                // Test for folders
+                try
+                {
+                    newFolder = folders[folder] as Outlook.Folder;
+                }
+                catch
+                {
+                    newFolder = folders.Add(folder, Type.Missing) as Outlook.Folder;
+                }
 
-            // What folder we want to move the email to.
-            rule.Actions.MoveToFolder.Folder = newFolder;
-            rule.Actions.MoveToFolder.Enabled = true;
+                // Now lets create our rule
+                Outlook.Rule rule = rules.Create(folder,
+                    Outlook.OlRuleType.olRuleReceive);
 
-            try
-            {
-                rules.Save(true);
-            }
-            catch (Exception ex)
-            {
-                OutputColor(ConsoleColor.Red, ex.Message + "\n");
+                // From from the google label
+                rule.Conditions.From.Recipients.Add(email);
+                rule.Conditions.From.Enabled = true;
+
+                // What folder we want to move the email to.
+                rule.Actions.MoveToFolder.Folder = newFolder;
+                rule.Actions.MoveToFolder.Enabled = true;
+
+                try
+                {
+                    rules.Save(true);
+                }
+                catch (Exception ex)
+                {
+                    OutputColor(ConsoleColor.Red, ex.Message + "\n");
+                }
             }
 
             return null;

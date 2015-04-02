@@ -3,16 +3,4 @@
 
 install:
   - nuget restore -Verbosity detailed
-  
-deploy:
-release: GFilterImporter-v$(appveyor_build_version)
-provider: GitHub
-auth_token:
-  secure: <your encrypted token> # your encrypted token from GitHub
-artifact: /.*\.nupkg/            # upload all NuGet packages to release assets
-draft: false
-prerelease: true
-on:
-  branch: master                 # release from master branch only
-  appveyor_repo_tag: true        # deploy on tag push only
 

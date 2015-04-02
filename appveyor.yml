@@ -17,8 +17,7 @@ nuget:
   project_feed: true
 
 build:
-  publish_wap: true
-  verbosity: minimal
+  verbosity: verbose 
 
 test:
   assemblies: CommandLine

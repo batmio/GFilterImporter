@@ -18,7 +18,7 @@ namespace GFilterImporter
             [Option('f', "file", Required = true, HelpText = "Input file to read.")]
             public string InputFile { get; set; }
 
-            [Option('u', "user", Required = false, HelpText = "Specific User.")]
+            [Option('u', "user", Required = true, HelpText = "Specific User.")]
             public string UserName { get; set; }
 
             [Option('v', null, HelpText = "Print details during execution.")]
@@ -85,6 +85,13 @@ namespace GFilterImporter
         {
 
             string mailFilter = mailFilters;
+
+            if (Path.GetExtension(mailFilter) != ".xml")
+            {
+                OutputColor(ConsoleColor.Red, "Not an XML file.\n");
+                System.Environment.Exit(1);
+            }
+
             if (File.Exists(@mailFilter))
             {
                 // XML Document Loader
@@ -171,8 +178,6 @@ namespace GFilterImporter
             // Default Folder
             Outlook.Folder newFolder;
             Outlook.Folders folders = outlook.Session.GetStoreFromID(storeId).GetRootFolder().Folders;
-            //Outlook.Folders folders = outlook.Session.GetDefaultFolder(
-            //   Outlook.OlDefaultFolders.olFolderInbox).Folders;
 
             // Test for folders
             try

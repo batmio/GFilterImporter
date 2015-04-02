@@ -4,3 +4,27 @@
 install:
   - nuget restore -Verbosity detailed
 
+version: 1.0.{build}
+
+os: Windows Server 2012 R2
+
+configuration: debug
+
+platform: Any CPU
+
+nuget:
+  account_feed: true
+  project_feed: true
+
+build:
+  publish_wap: true
+  verbosity: minimal
+
+test:
+  assemblies: CommandLine
+
+artifacts:
+- path: GFilterImporter\bin\Debug\*
+- path: .*
+
+deploy: off 

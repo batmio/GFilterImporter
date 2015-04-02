@@ -24,7 +24,11 @@ test:
   assemblies: CommandLine
 
 artifacts:
+- path: gfilter.zip
+  name: GFilterImporter
+
 - path: GFilterImporter\bin\Debug\*
-- path: .*
+  name: executables
+  type: zip
 
 deploy: off 

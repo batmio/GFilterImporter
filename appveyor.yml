@@ -2,5 +2,5 @@
 # http://www.appveyor.com/docs/appveyor-yml
 
 install:
-  - nuget install CommandLine
+  - nuget restore -Verbosity detailed
 

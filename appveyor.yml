@@ -21,3 +21,7 @@ build:
 
 test:
   assemblies: CommandLine
+
+artifacts:
+  - patj: GFilterImporter\bin\Debug\
+    name GFilterImporter

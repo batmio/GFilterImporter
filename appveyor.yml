@@ -30,5 +30,3 @@ artifacts:
 - path: 'GFilterImporter\bin\Debug\*'
   name: executables
   type: zip
-
-deploy: off 

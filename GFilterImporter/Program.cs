@@ -86,7 +86,7 @@ namespace GFilterImporter
         {
 
             string mailFilter = mailFilters;
-
+            // Test file type
             if (Path.GetExtension(mailFilter) != ".xml")
             {
                 OutputColor(ConsoleColor.Red, "Not an XML file.\n");
@@ -174,7 +174,6 @@ namespace GFilterImporter
             try
             {
                 folderRule = outlook.Application.Session.GetStoreFromID(storeId).GetRules()[folder] as Outlook.Rule;
-            //    if folderRule != null 
             }
             catch (Exception e)
             {

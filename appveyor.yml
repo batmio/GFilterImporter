@@ -24,4 +24,4 @@ test:
 
 artifacts:
   - path: GFilterImporter\bin\Debug\
-    name GFilterImporter
+    name: GFilterImporter

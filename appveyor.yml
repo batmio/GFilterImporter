@@ -17,7 +17,7 @@ nuget:
   project_feed: true
 
 build:
-  verbosity: verbose 
+  verbosity: normal 
 
 test:
   assemblies: CommandLine

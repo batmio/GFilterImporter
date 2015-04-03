@@ -23,5 +23,5 @@ test:
   assemblies: CommandLine
 
 artifacts:
-  - path: GFilterImporter\bin\Debug\
-    name: GFilterImporter
+  - path: GFilterImporter\bin\Debug\*
+    name: zip 

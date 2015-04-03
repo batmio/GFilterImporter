@@ -24,7 +24,7 @@ test:
 
 artifacts:
   - path: gfilter.zip
-    name GFilterImporter
+    name: GFilterImporter
 
   - path: GFilterImporter\bin\Debug
     name: exec 

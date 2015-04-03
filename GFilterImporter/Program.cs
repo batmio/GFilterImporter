@@ -237,6 +237,10 @@ namespace GFilterImporter
                     OutputColor(ConsoleColor.Red, ex.Message + "\n");
                 }
             }
+            else
+            {
+                OutputColor(ConsoleColor.Red, "Rule already exists. \n");
+            }
 
             return null;
         }

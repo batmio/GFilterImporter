@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Collections;
 using System.Xml;
 using System.IO;
@@ -49,7 +51,17 @@ namespace GFilterImporter
 
                 // Here we verify the Exchange account exists
                 Outlook.Application outlook = new Outlook.Application();
-                Outlook.AddressEntry currentUser = outlook.Session.CurrentUser.AddressEntry;
+                Outlook.AddressEntry currentUser;
+                currentUser = null;
+
+                try
+                {
+                    currentUser = outlook.Session.CurrentUser.AddressEntry;
+                }
+                catch
+                {
+                    OutputColor(ConsoleColor.Red, "Outlook is required to run this application!");
+                }
 
                 if (currentUser.Type != "EX")
                     OutputColor(ConsoleColor.Red, "Current user is not an exchange user.\n");
@@ -156,16 +168,9 @@ namespace GFilterImporter
             bool verbose, Outlook.Application outlook, string storeId)
         {
             // If filter is a sub-folder it creates filters as Name/Subfolder
-            folder = folder.Replace('/', '\\');
+            char[] split = {'/'};
+            string[] folderPath = folder.Split(split);
 
-            // Take the folder and the email name and parse it into a usable rule.
-            if (verbose)
-            {
-                Console.Write("We have Folder: ");
-                OutputColor(ConsoleColor.Magenta, folder + "\n");
-                Console.Write("We have From: ");
-                OutputColor(ConsoleColor.Magenta, email + "\n");
-            }
 
             // Retrieve current rules
             Outlook.Rules rules;
@@ -204,16 +209,48 @@ namespace GFilterImporter
 
                 // Default Folder
                 Outlook.Folder newFolder;
-                Outlook.Folders folders = outlook.Session.GetStoreFromID(storeId).GetRootFolder().Folders;
+                newFolder = null;
 
-                // Test for folders
-                try
+                for (int i = 0; i < folderPath.Length; i++)
                 {
-                    newFolder = folders[folder] as Outlook.Folder;
+                    try
+                    {
+                        try
+                        {
+                            if (i == 0)
+                            {
+                                newFolder = outlook.Session.GetStoreFromID(storeId).GetRootFolder().Folders[folderPath[i]] as Outlook.Folder;
+                            }
+                            else
+                            {
+                                newFolder = newFolder.Folders[folderPath[i]] as Outlook.Folder;
+                            }
+                        }
+                        catch
+                        {
+                            newFolder = newFolder.Folders[folderPath[i]] as Outlook.Folder;
+                        }
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            newFolder = newFolder.Folders.Add(folderPath[i], Type.Missing) as Outlook.Folder;
+                        }
+                        catch
+                        {
+                            newFolder = outlook.Session.GetStoreFromID(storeId).GetRootFolder().Folders.Add(folderPath[i], Type.Missing) as Outlook.Folder;
+                        }
+                    }
                 }
-                catch
+
+                // Take the folder and the email name and parse it into a usable rule.
+                if (verbose)
                 {
-                    newFolder = folders.Add(folder, Type.Missing) as Outlook.Folder;
+                    Console.Write("We have Folder: ");
+                    OutputColor(ConsoleColor.Magenta, newFolder.Name + "\n");
+                    Console.Write("We have From: ");
+                    OutputColor(ConsoleColor.Magenta, email + "\n");
                 }
 
                 // Now lets create our rule
@@ -221,12 +258,20 @@ namespace GFilterImporter
                     Outlook.OlRuleType.olRuleReceive);
 
                 // From from the google label
-                rule.Conditions.From.Recipients.Add(email);
-                rule.Conditions.From.Enabled = true;
+                Object[] addressCondition = { email };
+
+                rule.Conditions.SenderAddress.Address = addressCondition;
+                rule.Conditions.SenderAddress.Enabled = true;
+
+                // from is basic
+                //rule.Conditions.From.Recipients.Add(email);
+                //rule.Conditions.From.Enabled = true;
 
                 // What folder we want to move the email to.
                 rule.Actions.MoveToFolder.Folder = newFolder;
                 rule.Actions.MoveToFolder.Enabled = true;
+                // Stop after processing this.
+                rule.Actions.Stop.Enabled = true;
 
                 try
                 {
